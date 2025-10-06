@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang='ar' dir='rtl'>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<title>BTC Live — محمية بكلمة مرور (مصدر الشموع: Binance)</title>
+<meta charset='utf-8'/>
+<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
+<title>XAUUSD (Proxy via PAXGUSDT) — Live — محمية بكلمة مرور</title>
 <style>
 :root{--bg:#0d1117;--card:#161b22;--border:#30363d;--txt:#e6edf3;--muted:#9aa4b2;--brand:#0f6cbd;--up:#16a34a;--dn:#dc2626}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Segoe UI',Tahoma,Arial;margin:0}
 header{position:sticky;top:0;z-index:30;background:var(--brand);color:#fff;padding:.6rem .9rem}
 header h1{margin:0;font-size:1rem;line-height:1.2}
 .small{font-size:.85rem;opacity:.9}
-.container{padding:.7rem .9rem 1rem}
+.container{padding:.7rem .9rem 1.2rem}
 .toolbar,.controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.5rem 0}
 .btn,.toggle{background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:10px;padding:.5rem .7rem;font-size:.95rem;cursor:pointer}
 .toggle.active{background:#0a5ea8;border-color:#0a5ea8}
 .badge{background:#111827;border:1px solid #374151;padding:.25rem .5rem;border-radius:999px;font-size:.8rem}
 .banner{background:#1f2937;border:1px solid #374151;border-radius:12px;padding:.6rem .75rem;margin:.5rem 0;font-size:.95rem;display:none}
 .banner.err{background:#4b1d1d;border-color:#8a2b2b}
+.banner.sig{background:#1b4332;border-color:#2d6a4f}
 .chartWrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 svg{display:block;width:100%;height:64vh;max-height:760px}
 .grid line{stroke:#2a2f36;stroke-width:1}
@@ -32,99 +33,151 @@ svg{display:block;width:100%;height:64vh;max-height:760px}
 .btnPrimary{background:#0f6cbd;border:1px solid #0f6cbd;color:#fff;border-radius:10px;padding:.6rem .9rem;font-size:1rem;cursor:pointer}
 .msg{margin-top:.5rem;color:#fca5a5;font-size:.9rem;min-height:1.2em}
 .smallNote{margin-top:.4rem;color:#9aa4b2;font-size:.85rem}
-.price{font-weight:600}
+.hud{font-size:.85rem;color:#cbd5e1}
 </style>
 </head>
 <body>
-<noscript><div style="padding:10px;background:#7f1d1d;color:#fff">⚠️ المتصفح يمنع تشغيل JavaScript. فعّل JavaScript ثم أعد فتح الصفحة.</div></noscript>
+<noscript><div style='padding:10px;background:#7f1d1d;color:#fff'>⚠️ المتصفح يمنع تشغيل JavaScript. فعّل JavaScript ثم أعد فتح الصفحة.</div></noscript>
 
 <!-- Password Gate -->
-<div id="gate" class="gate" aria-modal="true" role="dialog">
-  <div class="card">
+<div id='gate' class='gate' aria-modal='true' role='dialog'>
+  <div class='card'>
     <h2>🔐 حماية بكلمة مرور</h2>
-    <div class="row">
-      <input id="pwd" type="password" class="inp" placeholder="أدخل كلمة المرور" autocomplete="current-password" />
-      <button id="go" class="btnPrimary">دخول</button>
+    <div class='row'>
+      <input id='pwd' type='password' class='inp' placeholder='أدخل كلمة المرور' autocomplete='current-password' />
+      <button id='go' class='btnPrimary'>دخول</button>
     </div>
-    <label class="smallNote"><input type="checkbox" id="remember" /> تذكّرني على هذا الجهاز</label>
-    <div id="msg" class="msg"></div>
-    <div class="smallNote">يمكنك تغيير كلمة المرور عبر تعديل الهاش في الكود (<code>PWD_HASH_HEX</code>).</div>
+    <label class='smallNote'><input type='checkbox' id='remember'/> تذكّرني على هذا الجهاز</label>
+    <div id='msg' class='msg'></div>
+    <div class='smallNote'>يمكن تغيير كلمة المرور عبر تعديل الهاش في الكود (<code>PWD_HASH_HEX</code>).</div>
   </div>
 </div>
 
 <!-- محتوى الصفحة المحمي -->
-<div id="app" style="display:none">
+<div id='app' style='display:none'>
   <header>
-    <h1>BTC Live — محمي (آخر تحديث: 2025-10-05 13:29)</h1>
-    <div class="small">المصدر: شموع <b>Binance Klines</b> على 15م + سعر حي عبر <b>Binance WebSocket</b>. ⚠️ للاستخدام التحليلي فقط.</div>
+    <h1>XAUUSD — Live عبر وكيل PAXGUSDT (آخر تحديث: 2025-10-05 16:04)</h1>
+    <div class='small'>الشموع: <b>Binance Klines (PAXGUSDT)</b> 15م. السعر الحي: <b>Binance WS</b>. *PAXG تتبع الذهب لكن قد يظهر فرق بسيط (Premium/Discount).</div>
   </header>
-  <div class="container">
-    <div id="err" class="banner err"></div>
+  <div class='container'>
+    <div id='err' class='banner err'></div>
+    <div id='sig' class='banner sig'></div>
 
-    <div class="toolbar">
-      <button id="btnNew" class="btn">🔄 تحديث الشموع الآن</button>
-      <button id="btnLive" class="toggle">تحديث تلقائي</button>
-      <span class="badge">سعر حي: <span id="livePrice" class="price">—</span></span>
-      <span style="flex:1"></span>
-      <button id="btnProxy" class="toggle">Proxy (عند الحاجة)</button>
-      <button id="btnLogout" class="btn">🔒 قفل الصفحة</button>
+    <div class='toolbar'>
+      <button id='btnRefresh' class='btn'>🔄 تحديث الشموع الآن</button>
+      <button id='btnAuto' class='toggle'>تحديث تلقائي</button>
+      <button id='btnProxy' class='toggle'>Proxy</button>
+      <button id='btnNotify' class='toggle'>تفعيل إشعارات المتصفح</button>
+      <span class='badge'>سعر حي: <span id='livePrice'>—</span></span>
+      <span style='flex:1'></span>
+      <button id='btnLogout' class='btn'>🔒 قفل الصفحة</button>
     </div>
 
-    <div class="controls">
-      <span class="badge">إظهار/إخفاء:</span>
-      <button class="toggle active" data-layer="EMA20">EMA20</button>
-      <button class="toggle active" data-layer="EMA50">EMA50</button>
+    <div class='controls'>
+      <span class='badge'>إظهار/إخفاء:</span>
+      <button class='toggle active' data-layer='EMA20'>EMA20</button>
+      <button class='toggle active' data-layer='EMA50'>EMA50</button>
+      <button class='toggle active' data-layer='Pivots'>Pivot</button>
     </div>
 
-    <div class="chartWrap">
-      <svg id="svg"></svg>
+    <div class='hud' id='hud'>RSI: — | ATR: — | جلسة: <span id='session'>—</span></div>
+
+    <div class='chartWrap'>
+      <svg id='svg'></svg>
     </div>
 
-    <div class="hint">إن لم تُحدّث الشموع بسبب CORS من مزوّد البيانات، فعّل زر <b>Proxy</b> أعلاه ثم جرّب "تحديث الشموع".</div>
+    <div class='hint'>إذا لم تُحدّث الشموع: فعّل <b>Proxy</b> ثم اضغط "تحديث الشموع". لإشعار بالبريد/الموبايل عند ظهور إشارة BUY/SELL يمكنك تزويد رابط Webhook (IFTTT/Power Automate) في إصدار لاحق.</div>
   </div>
 </div>
 
 <script>
 // ===== Password Gate =====
-const PWD_HASH_HEX = '764504fa44f41d534b37ebab459a25170472779bd5cc2095101f98087c084356';
-const GATE_KEY = 'ynh_gate_ok';
-async function sha256(txt){ const enc=new TextEncoder().encode(txt); const h=await crypto.subtle.digest('SHA-256', enc); return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
-async function checkPwd(){ const pwd=document.getElementById('pwd').value; const remember=document.getElementById('remember').checked; const msg=document.getElementById('msg'); msg.textContent=''; try{ const h=await sha256(pwd); if(h===PWD_HASH_HEX){ (remember?localStorage:sessionStorage).setItem(GATE_KEY,'1'); openApp(); } else { msg.textContent='❌ كلمة مرور غير صحيحة'; } }catch(e){ msg.textContent='حدث خطأ في التحقق'; } }
-function openApp(){ document.getElementById('gate').style.display='none'; document.getElementById('app').style.display='block'; startApp(); }
-(function(){ const ok=localStorage.getItem(GATE_KEY)||sessionStorage.getItem(GATE_KEY); if(ok==='1'){ openApp(); }})();
-document.getElementById('go').addEventListener('click', checkPwd);
-document.getElementById('pwd').addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkPwd(); });
+const PWD_HASH_HEX='764504fa44f41d534b37ebab459a25170472779bd5cc2095101f98087c084356';
+const GATE_KEY='ynh_gate_ok';
+async function sha256(t){const e=new TextEncoder().encode(t);const n=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(n)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function checkPwd(){const p=document.getElementById('pwd').value;const r=document.getElementById('remember').checked;const m=document.getElementById('msg');m.textContent='';try{const h=await sha256(p);if(h===PWD_HASH_HEX){(r?localStorage:sessionStorage).setItem(GATE_KEY,'1');openApp()}else{m.textContent='❌ كلمة مرور غير صحيحة'}}catch(e){m.textContent='حدث خطأ في التحقق'}}
+function openApp(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';startApp()}
+(()=>{const ok=localStorage.getItem(GATE_KEY)||sessionStorage.getItem(GATE_KEY);if(ok==='1'){openApp()}})();
+document.getElementById('go').addEventListener('click',checkPwd);
+document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')checkPwd()});
 
-// ===== BTC Live (Binance REST + Binance WS) =====
-const svg=document.getElementById('svg');
-let DATA=[]; let autoTimer=null; let ws=null; let useProxy=false;
-function showErr(msg){ const e=document.getElementById('err'); e.textContent=msg; e.style.display='block'; }
-function hideErr(){ const e=document.getElementById('err'); e.style.display='none'; }
+// ===== Helpers =====
+function ema(arr,span){const k=2/(span+1);let out=[],prev=null;for(let i=0;i<arr.length;i++){const v=arr[i];prev=(prev==null)?v:(v*k+prev*(1-k));out.push(prev)}return out}
+function rsi(close,period=14){let gains=[],losses=[],out=new Array(close.length).fill(null);for(let i=1;i<close.length;i++){const ch=close[i]-close[i-1];gains.push(Math.max(ch,0));losses.push(Math.max(-ch,0));if(i>=period){const g=gains.slice(i-period,i).reduce((a,b)=>a+b,0)/period;const l=losses.slice(i-period,i).reduce((a,b)=>a+b,0)/period;const rs=(l===0)?100:(g/l);out[i]=100-(100/(1+rs))}}return out}
+function atr(h,l,c,period=14){const tr=[];for(let i=0;i<h.length;i++){if(i===0){tr.push(h[i]-l[i]);continue}const pc=c[i-1];tr.push(Math.max(h[i]-l[i],Math.abs(h[i]-pc),Math.abs(l[i]-pc)))}const out=new Array(h.length).fill(null);for(let i=period;i<tr.length;i++){let s=0;for(let j=i-period+1;j<=i;j++)s+=tr[j];out[i]=s/period}return out}
+function pivotsFromDay(ds){if(!ds||!ds.length)return null;const H=Math.max(...ds.map(d=>d.high));const L=Math.min(...ds.map(d=>d.low));const C=ds[ds.length-1].close;const PP=(H+L+C)/3;const R1=2*PP-L,S1=2*PP-H,R2=PP+(H-L),S2=PP-(H-L);return {PP,R1,S1,R2,S2}}
+function sessionNowUTC(){const h=new Date().getUTCHours();if(h>=7&&h<12)return 'طوكيو';if(h>=7&&h<16)return 'لندن';if(h>=13&&h<=21)return 'نيويورك';return 'هادئ'}
 
-function klineURL(){ const base='https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=15m&limit=500'; if(!useProxy) return base; return 'https://api.allorigins.win/raw?url='+encodeURIComponent(base); }
+// ===== Data (PAXGUSDT as proxy for XAUUSD) =====
+let useProxy=false; let autoTimer=null; let ws=null; let lastSignalTime=0; let layers={EMA20:true,EMA50:true,Pivots:true};
+function klineURL(){const base='https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=15m&limit=500';return useProxy?('https://api.allorigins.win/raw?url='+encodeURIComponent(base)):base}
+async function fetchPAXG(){try{const rsp=await fetch(klineURL());if(!rsp.ok) throw new Error('HTTP '+rsp.status);const arr=await rsp.json();return arr.map(x=>({time:new Date(x[0]),open:+x[1],high:+x[2],low:+x[3],close:+x[4]}))}catch(e){showErr('فشل جلب الشموع: '+e.message+(useProxy?' (Proxy)':''));return null}}
 
-async function fetchBinance(){ try{ const rsp=await fetch(klineURL()); if(!rsp.ok) throw new Error('HTTP '+rsp.status); const arr=await rsp.json(); return arr.map(x=>({ time:new Date(x[0]), open:+x[1], high:+x[2], low:+x[3], close:+x[4] })); } catch(e){ showErr('فشل جلب الشموع من Binance: '+e.message+(useProxy?' (مع Proxy)':'')); return null; } }
+// ===== Chart (SVG) =====
+const svg=document.getElementById('svg'); let DATA=[]; let pivShapes=[];
+function draw(){svg.innerHTML=''; hideErr(); document.getElementById('session').textContent=sessionNowUTC();
+ const W=svg.clientWidth||svg.parentNode.clientWidth||360, H=svg.clientHeight||520;
+ const m={l:56,r:20,t:16,b:22}, iw=Math.max(200,W-m.l-m.r), ih=Math.max(200,H-m.t-m.b);
+ if(!DATA||DATA.length<2){showErr('لا توجد بيانات كافية للرسم.');return}
+ const x=DATA.map(d=>d.time.getTime()), o=DATA.map(d=>d.open), h=DATA.map(d=>d.high), l=DATA.map(d=>d.low), c=DATA.map(d=>d.close);
+ const e20=ema(c,20), e50=ema(c,50), R=rsi(c,14), A=atr(h,l,c,14);
+ // per-day grouping for pivots
+ const byDay={}; DATA.forEach(d=>{const k=d.time.toISOString().slice(0,10);(byDay[k]=byDay[k]||[]).push({high:d.high,low:d.low,close:d.close})});
+ const days=Object.keys(byDay).sort(); const prev=days.length>1?byDay[days[days.length-2]]:null; const piv=prev?pivotsFromDay(prev):null;
+ // scales
+ const yHigh=Math.max(...h), yLow=Math.min(...l), pad=(yHigh-yLow)*0.05, Ymax=yHigh+pad, Ymin=yLow-pad;
+ const sx=t=> m.l+((t-x[0])/(x[x.length-1]-x[0]))*iw, sy=v=> m.t+(1-(v-Ymin)/(Ymax-Ymin))*ih;
+ // grid
+ const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','grid'); svg.appendChild(g);
+ const ticks=6; for(let i=0;i<=ticks;i++){ const val=Ymin+i*(Ymax-Ymin)/ticks, yy=sy(val);
+  const ln=document.createElementNS('http://www.w3.org/2000/svg','line'); ln.setAttribute('x1',m.l); ln.setAttribute('x2',m.l+iw); ln.setAttribute('y1',yy); ln.setAttribute('y2',yy); ln.setAttribute('stroke','#2a2f36'); g.appendChild(ln);
+  const tx=document.createElementNS('http://www.w3.org/2000/svg','text'); tx.setAttribute('x',m.l-6); tx.setAttribute('y',yy+3); tx.setAttribute('class','axis'); tx.setAttribute('text-anchor','end'); tx.textContent=val.toFixed(2); svg.appendChild(tx); }
+ // candles
+ const cw=Math.max(3, iw/x.length*0.7);
+ for(let i=0;i<DATA.length;i++){
+  const d=DATA[i], X=sx(x[i]);
+  const w=document.createElementNS('http://www.w3.org/2000/svg','line'); w.setAttribute('x1',X); w.setAttribute('x2',X);
+  w.setAttribute('y1',sy(d.low)); w.setAttribute('y2',sy(d.high)); w.setAttribute('stroke','#9aa4b2'); w.setAttribute('stroke-width','1'); svg.appendChild(w);
+  const up=d.close>=d.open, color=up?'var(--up)':'var(--dn)'; const y0=sy(d.open), y1=sy(d.close); const hh=Math.max(1,Math.abs(y1-y0));
+  const b=document.createElementNS('http://www.w3.org/2000/svg','rect'); b.setAttribute('x', X-cw/2); b.setAttribute('y', Math.min(y0,y1)); b.setAttribute('width', cw); b.setAttribute('height', hh); b.setAttribute('fill', color); svg.appendChild(b);
+ }
+ // EMAs
+ function pathFrom(xs,ys){let d='',start=false; for(let i=0;i<xs.length;i++){ if(ys[i]==null||isNaN(ys[i])) continue; const X=sx(xs[i]), Y=sy(ys[i]); d+=(start?' L ':' M ')+X+' '+Y; start=true } return d }
+ const p20=pathFrom(x,e20), p50=pathFrom(x,e50);
+ if(layers.EMA20){ const p=document.createElementNS('http://www.w3.org/2000/svg','path'); p.setAttribute('d',p20); p.setAttribute('stroke','#F59E0B'); p.setAttribute('fill','none'); p.setAttribute('stroke-width','1.6'); p.setAttribute('id','EMA20'); svg.appendChild(p) }
+ if(layers.EMA50){ const p=document.createElementNS('http://www.w3.org/2000/svg','path'); p.setAttribute('d',p50); p.setAttribute('stroke','#3B82F6'); p.setAttribute('fill','none'); p.setAttribute('stroke-width','1.6'); p.setAttribute('id','EMA50'); svg.appendChild(p) }
+ // pivots
+ if(piv && layers.Pivots){ const keys=['PP','R1','S1','R2','S2']; keys.forEach(k=>{const val=piv[k]; const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',m.l); line.setAttribute('x2',m.l+iw); line.setAttribute('y1',sy(val)); line.setAttribute('y2',sy(val)); line.setAttribute('stroke','#9aa4b2'); line.setAttribute('stroke-dasharray','4 4'); svg.appendChild(line) }) }
+ // legend + HUD
+ const hud=document.getElementById('hud'); const n=c.length-1; const atr=A[n]||0; hud.textContent='RSI: '+(R[n]?R[n].toFixed(0):'—')+' | ATR: '+(atr && c[n]?((atr/c[n]*100).toFixed(2)+'%'):'—')+' | جلسة: '+sessionNowUTC();
+ // signals
+ const sig=evalSignal(c,e20,e50,R,A,piv);
+ const box=document.getElementById('sig'); box.style.display='none';
+ if(sig){ box.style.display='block'; box.textContent='⚡ '+sig.type+' | '+sig.reason+' | Entry '+sig.entry.toFixed(2)+' | SL '+sig.sl.toFixed(2)+' | TP1 '+sig.tp1.toFixed(2)+' | TP2 '+sig.tp2.toFixed(2);
+  if(Notification.permission==='granted' && (Date.now()-lastSignalTime>60000)){ new Notification('XAU (via PAXG): '+sig.type, {body: sig.reason+' — Entry '+sig.entry.toFixed(2)}); lastSignalTime=Date.now(); }
+ }
+}
 
-function ema(series,span){ const k=2/(span+1); let out=[],prev=null; for(let i=0;i<series.length;i++){ const v=series[i]; prev=(prev==null)?v:(v*k+prev*(1-k)); out.push(prev);} return out; }
+function evalSignal(close,e20,e50,r,a,piv){ const n=close.length-1; if(n<2||!piv) return null; const last=close[n]; const trendUp=e20[n]>e50[n] && last>e50[n]; const trendDn=e20[n]<e50[n] && last<e50[n]; const rsi=r[n]; const atr=a[n]||0; if(!rsi||!atr) return null; const margin=0.2*atr; if(trendUp && rsi>50 && rsi<70 && last>(piv.R1+margin)){ const entry=last, sl=Math.min(close[n-1], entry-1.5*atr), tp1=entry+1*atr, tp2=entry+2*atr; return {type:'BUY',entry,sl,tp1,tp2,reason:'اختراق R1 + اتجاه صاعد'} } if(trendDn && rsi>30 && rsi<50 && last<(piv.S1-margin)){ const entry=last, sl=Math.max(close[n-1], entry+1.5*atr), tp1=entry-1*atr, tp2=entry-2*atr; return {type:'SELL',entry,sl,tp1,tp2,reason:'كسر S1 + اتجاه هابط'} } return null }
 
-function draw(){ svg.innerHTML=''; hideErr(); const W=svg.clientWidth||svg.parentNode.clientWidth||360, H=svg.clientHeight||520; const m={l:56,r:20,t:16,b:22}; const iw=Math.max(200,W-m.l-m.r), ih=Math.max(200,H-m.t-m.b); if(!DATA||DATA.length<2){ showErr('لا توجد بيانات كافية للرسم.'); return; } const xVals=DATA.map(d=>d.time.getTime()); const yHigh=Math.max(...DATA.map(d=>d.high)), yLow=Math.min(...DATA.map(d=>d.low)); const pad=(yHigh-yLow)*0.05, Ymax=yHigh+pad, Ymin=yLow-pad; const x0=xVals[0], x1=xVals[xVals.length-1]; const sx=t=> m.l+((t-x0)/(x1-x0))*iw, sy=v=> m.t+(1-(v-Ymin)/(Ymax-Ymin))*ih; const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','grid'); svg.appendChild(g); const ticks=6; for(let i=0;i<=ticks;i++){ const v=Ymin+i*(Ymax-Ymin)/ticks, y=sy(v); const ln=document.createElementNS('http://www.w3.org/2000/svg','line'); ln.setAttribute('x1',m.l); ln.setAttribute('x2',m.l+iw); ln.setAttribute('y1',y); ln.setAttribute('y2',y); ln.setAttribute('stroke','#2a2f36'); g.appendChild(ln); const tx=document.createElementNS('http://www.w3.org/2000/svg','text'); tx.setAttribute('x',m.l-6); tx.setAttribute('y',y+3); tx.setAttribute('class','axis'); tx.setAttribute('text-anchor','end'); tx.textContent=v.toFixed(0); svg.appendChild(tx);} const n=DATA.length, cw=Math.max(3, iw/n*0.7); for(const d of DATA){ const x=sx(d.time.getTime()); const wick=document.createElementNS('http://www.w3.org/2000/svg','line'); wick.setAttribute('x1',x); wick.setAttribute('x2',x); wick.setAttribute('y1',sy(d.low)); wick.setAttribute('y2',sy(d.high)); wick.setAttribute('stroke','#9aa4b2'); wick.setAttribute('stroke-width','1'); svg.appendChild(wick); const up=d.close>=d.open, color= up? 'var(--up)':'var(--dn)'; const y0=sy(d.open), y1=sy(d.close), h=Math.max(1,Math.abs(y1-y0)); const body=document.createElementNS('http://www.w3.org/2000/svg','rect'); body.setAttribute('x',x-cw/2); body.setAttribute('y',Math.min(y0,y1)); body.setAttribute('width',cw); body.setAttribute('height',h); body.setAttribute('fill',color); svg.appendChild(body);} const closes=DATA.map(d=>d.close), e20=ema(closes,20), e50=ema(closes,50); const p20=pathFromSeries(DATA.map(d=>d.time.getTime()), e20, sx, sy), p50=pathFromSeries(DATA.map(d=>d.time.getTime()), e50, sx, sy); const path20=document.createElementNS('http://www.w3.org/2000/svg','path'); path20.setAttribute('d',p20); path20.setAttribute('stroke','#F59E0B'); path20.setAttribute('fill','none'); path20.setAttribute('stroke-width','1.6'); path20.setAttribute('id','EMA20'); svg.appendChild(path20); const path50=document.createElementNS('http://www.w3.org/2000/svg','path'); path50.setAttribute('d',p50); path50.setAttribute('stroke','#3B82F6'); path50.setAttribute('fill','none'); path50.setAttribute('stroke-width','1.6'); path50.setAttribute('id','EMA50'); svg.appendChild(path50); const lg=document.createElementNS('http://www.w3.org/2000/svg','text'); lg.setAttribute('x', m.l+8); lg.setAttribute('y', m.t+14); lg.setAttribute('class','legend'); lg.textContent='Candles | EMA20 | EMA50'; svg.appendChild(lg); }
-function pathFromSeries(xs,ys,sx,sy){ let d='',started=false; for(let i=0;i<xs.length;i++){ if(ys[i]==null||isNaN(ys[i])) continue; const X=sx(xs[i]), Y=sy(ys[i]); d+=(started?' L ':' M ')+X+' '+Y; started=true;} return d; }
+function showErr(msg){ const e=document.getElementById('err'); e.textContent=msg; e.style.display='block' }
+function hideErr(){ const e=document.getElementById('err'); e.style.display='none' }
 
-async function refreshCandles(){ const d=await fetchBinance(); if(d&&d.length){ DATA=d; draw(); } }
-function startAuto(){ if(autoTimer) clearInterval(autoTimer); autoTimer=setInterval(refreshCandles, 120000); }
-function stopAuto(){ if(autoTimer) clearInterval(autoTimer); autoTimer=null; }
+async function refresh(){ const d=await fetchPAXG(); if(d&&d.length){ DATA=d; draw() } }
+function startAuto(){ if(autoTimer) clearInterval(autoTimer); autoTimer=setInterval(refresh, 120000) }
+function stopAuto(){ if(autoTimer) clearInterval(autoTimer); autoTimer=null }
 
-function startWS(){ try{ ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker'); ws.onmessage=(ev)=>{ const o=JSON.parse(ev.data); if(o&&o.c){ document.getElementById('livePrice').textContent='BTC '+parseFloat(o.c).toLocaleString('en-US',{maximumFractionDigits:2}); } }; ws.onclose=()=> setTimeout(startWS, 5000); }catch(e){} }
+function startWS(){ try{ ws=new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker'); ws.onmessage=(ev)=>{ const o=JSON.parse(ev.data); if(o&&o.c){ document.getElementById('livePrice').textContent='PAXG '+parseFloat(o.c).toLocaleString('en-US',{maximumFractionDigits:2}); } }; ws.onclose=()=> setTimeout(startWS, 5000); }catch(e){} }
 
 function startApp(){
-  document.getElementById('btnNew').addEventListener('click', refreshCandles);
-  const tg=document.getElementById('btnLive');
-  tg.addEventListener('click', ()=>{ tg.classList.toggle('active'); if(tg.classList.contains('active')) startAuto(); else stopAuto(); });
-  document.querySelectorAll('.toggle[data-layer]').forEach(btn=>{ btn.addEventListener('click', ()=>{ btn.classList.toggle('active'); const id=btn.getAttribute('data-layer'); const node=document.getElementById(id); if(node) node.style.display = btn.classList.contains('active')? 'inline':'none'; }); });
-  document.getElementById('btnLogout').addEventListener('click', ()=>{ localStorage.removeItem(GATE_KEY); sessionStorage.removeItem(GATE_KEY); location.reload(); });
-  document.getElementById('btnProxy').addEventListener('click', (e)=>{ useProxy=!useProxy; e.target.classList.toggle('active', useProxy); refreshCandles(); });
-  // first load
-  refreshCandles(); startWS();
+  document.getElementById('btnRefresh').addEventListener('click', refresh);
+  const tgl=document.getElementById('btnAuto'); tgl.addEventListener('click',()=>{ tgl.classList.toggle('active'); if(tgl.classList.contains('active')) startAuto(); else stopAuto(); });
+  document.getElementById('btnProxy').addEventListener('click',(e)=>{ useProxy=!useProxy; e.target.classList.toggle('active', useProxy); refresh(); });
+  document.getElementById('btnLogout').addEventListener('click',()=>{ localStorage.removeItem(GATE_KEY); sessionStorage.removeItem(GATE_KEY); location.reload(); });
+  document.getElementById('btnNotify').addEventListener('click', async ()=>{ try{ const p=await Notification.requestPermission(); if(p==='granted'){ new Notification('تم تفعيل إشعارات المتصفح'); document.getElementById('btnNotify').classList.add('active'); } }catch(e){} });
+  document.querySelectorAll('.toggle[data-layer]').forEach(btn=>{ btn.addEventListener('click',()=>{ btn.classList.toggle('active'); const id=btn.getAttribute('data-layer'); layers[id]=btn.classList.contains('active'); draw(); }); });
+  refresh(); startWS();
+  window.addEventListener('resize', ()=>{ if(DATA&&DATA.length) draw(); });
 }
 </script>
 </body>
