@@ -3,182 +3,154 @@
 <head>
 <meta charset='utf-8'/>
 <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
-<title>XAUUSD (Proxy via PAXGUSDT) — Live — محمية بكلمة مرور</title>
+<title>XAU — إشعارات فورية بدون شموع (PAXGUSDT/BNB WS)</title>
 <style>
-:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--txt:#e6edf3;--muted:#9aa4b2;--brand:#0f6cbd;--up:#16a34a;--dn:#dc2626}
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--txt:#e6edf3;--muted:#9aa4b2;--brand:#0f6cbd;--up:#16a34a;--dn:#ef4444}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Segoe UI',Tahoma,Arial;margin:0}
-header{position:sticky;top:0;z-index:30;background:var(--brand);color:#fff;padding:.6rem .9rem}
-header h1{margin:0;font-size:1rem;line-height:1.2}
-.small{font-size:.85rem;opacity:.9}
-.container{padding:.7rem .9rem 1.2rem}
-.toolbar,.controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin:.5rem 0}
-.btn,.toggle{background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:10px;padding:.5rem .7rem;font-size:.95rem;cursor:pointer}
+header{position:sticky;top:0;z-index:10;background:var(--brand);color:#fff;padding:.7rem .9rem}
+header h1{margin:0;font-size:1rem}
+.small{font-size:.85rem;opacity:.92}
+.container{padding:1rem .9rem 2rem;display:grid;gap:.9rem}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.badge{background:#111827;border:1px solid #374151;padding:.35rem .55rem;border-radius:999px;font-size:.85rem}
+.btn,.toggle{background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:10px;padding:.55rem .7rem;font-size:.95rem;cursor:pointer}
 .toggle.active{background:#0a5ea8;border-color:#0a5ea8}
-.badge{background:#111827;border:1px solid #374151;padding:.25rem .5rem;border-radius:999px;font-size:.8rem}
-.banner{background:#1f2937;border:1px solid #374151;border-radius:12px;padding:.6rem .75rem;margin:.5rem 0;font-size:.95rem;display:none}
-.banner.err{background:#4b1d1d;border-color:#8a2b2b}
-.banner.sig{background:#1b4332;border-color:#2d6a4f}
-.chartWrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-svg{display:block;width:100%;height:64vh;max-height:760px}
-.grid line{stroke:#2a2f36;stroke-width:1}
-.axis{fill:var(--muted);font-size:10px}
-.legend{fill:var(--muted);font-size:12px}
-.hint{color:var(--muted);font-size:.85rem;margin-top:.4rem}
-/* Gate */
-.gate{position:fixed;inset:0;background:linear-gradient(180deg,#0b1220,#0d1117);display:flex;align-items:center;justify-content:center;z-index:9999}
-.card{width:min(420px,92%);background:#0f172a;border:1px solid #243045;border-radius:14px;padding:18px}
-.card h2{margin:.2rem 0 1rem;font-size:1.05rem;color:#e5e7eb}
-.row{display:flex;gap:.5rem}
-.inp{flex:1;background:#0b1220;border:1px solid #334155;border-radius:10px;padding:.6rem .7rem;color:#e5e7eb;font-size:1rem}
-.btnPrimary{background:#0f6cbd;border:1px solid #0f6cbd;color:#fff;border-radius:10px;padding:.6rem .9rem;font-size:1rem;cursor:pointer}
-.msg{margin-top:.5rem;color:#fca5a5;font-size:.9rem;min-height:1.2em}
-.smallNote{margin-top:.4rem;color:#9aa4b2;font-size:.85rem}
-.hud{font-size:.85rem;color:#cbd5e1}
+.price{font-weight:700;font-size:1.35rem}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:.5rem}
+.kv div{background:#0f172a;border:1px solid #243045;border-radius:8px;padding:.5rem .6rem;font-size:.95rem}
+.kv b{display:block;color:#9ca3af;font-weight:600;margin-bottom:.2rem}
+.sig{border-left:4px solid #10b981;padding-left:.6rem}
+.sig.sell{border-color:#ef4444}
+.list{display:grid;gap:.5rem}
+.input{flex:1;min-width:260px;background:#0b1220;border:1px solid #334155;border-radius:10px;padding:.55rem .7rem;color:#e5e7eb}
+.err{background:#4b1d1d;border:1px solid #8a2b2b;border-radius:10px;padding:.5rem .7rem;display:none}
 </style>
 </head>
 <body>
-<noscript><div style='padding:10px;background:#7f1d1d;color:#fff'>⚠️ المتصفح يمنع تشغيل JavaScript. فعّل JavaScript ثم أعد فتح الصفحة.</div></noscript>
+<header>
+  <h1>XAU — إشعارات فورية بدون رسم شموع (آخر تحديث: 2025-10-06 13:26)</h1>
+  <div class='small'>المصدر: <b>Binance WebSocket</b> لسعر PAXGUSDT + Kline 1m/15m لإشارات RSI/EMA/MACD. لا حاجة لـ REST، لتفادي مشاكل CORS.</div>
+</header>
+<div class='container'>
 
-<!-- Password Gate -->
-<div id='gate' class='gate' aria-modal='true' role='dialog'>
-  <div class='card'>
-    <h2>🔐 حماية بكلمة مرور</h2>
+  <div id='err' class='err'></div>
+
+  <section class='panel'>
     <div class='row'>
-      <input id='pwd' type='password' class='inp' placeholder='أدخل كلمة المرور' autocomplete='current-password' />
-      <button id='go' class='btnPrimary'>دخول</button>
-    </div>
-    <label class='smallNote'><input type='checkbox' id='remember'/> تذكّرني على هذا الجهاز</label>
-    <div id='msg' class='msg'></div>
-    <div class='smallNote'>يمكن تغيير كلمة المرور عبر تعديل الهاش في الكود (<code>PWD_HASH_HEX</code>).</div>
-  </div>
-</div>
-
-<!-- محتوى الصفحة المحمي -->
-<div id='app' style='display:none'>
-  <header>
-    <h1>XAUUSD — Live عبر وكيل PAXGUSDT (آخر تحديث: 2025-10-05 16:04)</h1>
-    <div class='small'>الشموع: <b>Binance Klines (PAXGUSDT)</b> 15م. السعر الحي: <b>Binance WS</b>. *PAXG تتبع الذهب لكن قد يظهر فرق بسيط (Premium/Discount).</div>
-  </header>
-  <div class='container'>
-    <div id='err' class='banner err'></div>
-    <div id='sig' class='banner sig'></div>
-
-    <div class='toolbar'>
-      <button id='btnRefresh' class='btn'>🔄 تحديث الشموع الآن</button>
-      <button id='btnAuto' class='toggle'>تحديث تلقائي</button>
-      <button id='btnProxy' class='toggle'>Proxy</button>
-      <button id='btnNotify' class='toggle'>تفعيل إشعارات المتصفح</button>
-      <span class='badge'>سعر حي: <span id='livePrice'>—</span></span>
+      <span class='badge'>رمز: PAXGUSDT ≈ XAUUSD</span>
+      <span class='badge'>فاصل الإشارات: 15m</span>
+      <span class='badge'>حجم نافذة 15m: 200</span>
+      <span class='badge'>سعر حي: <span id='live' class='price'>—</span></span>
       <span style='flex:1'></span>
-      <button id='btnLogout' class='btn'>🔒 قفل الصفحة</button>
+      <button id='start' class='toggle'>بدء الإشارات</button>
+      <button id='notify' class='toggle'>تفعيل إشعارات المتصفح</button>
     </div>
-
-    <div class='controls'>
-      <span class='badge'>إظهار/إخفاء:</span>
-      <button class='toggle active' data-layer='EMA20'>EMA20</button>
-      <button class='toggle active' data-layer='EMA50'>EMA50</button>
-      <button class='toggle active' data-layer='Pivots'>Pivot</button>
+    <div class='row' style='margin-top:.6rem'>
+      <input id='webhook' class='input' placeholder='اختياري: Webhook لرسائل البريد/الموبايل (IFTTT/Power Automate)'/>
+      <button id='save' class='btn'>حفظ</button>
+      <button id='test' class='btn'>اختبار إرسال</button>
     </div>
+  </section>
 
-    <div class='hud' id='hud'>RSI: — | ATR: — | جلسة: <span id='session'>—</span></div>
-
-    <div class='chartWrap'>
-      <svg id='svg'></svg>
+  <section class='panel'>
+    <div class='row'><b>مؤشرات 15m (مباشر):</b></div>
+    <div class='kv'>
+      <div><b>EMA20</b><span id='ema20'>—</span></div>
+      <div><b>EMA50</b><span id='ema50'>—</span></div>
+      <div><b>RSI(14)</b><span id='rsi'>—</span></div>
+      <div><b>MACD(12,26,9)</b><span id='macd'>—</span></div>
     </div>
+  </section>
 
-    <div class='hint'>إذا لم تُحدّث الشموع: فعّل <b>Proxy</b> ثم اضغط "تحديث الشموع". لإشعار بالبريد/الموبايل عند ظهور إشارة BUY/SELL يمكنك تزويد رابط Webhook (IFTTT/Power Automate) في إصدار لاحق.</div>
-  </div>
+  <section class='panel'>
+    <div class='row'><b>آخر الإشارات:</b></div>
+    <div id='signals' class='list'></div>
+  </section>
+
 </div>
 
 <script>
-// ===== Password Gate =====
-const PWD_HASH_HEX='764504fa44f41d534b37ebab459a25170472779bd5cc2095101f98087c084356';
-const GATE_KEY='ynh_gate_ok';
-async function sha256(t){const e=new TextEncoder().encode(t);const n=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(n)).map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function checkPwd(){const p=document.getElementById('pwd').value;const r=document.getElementById('remember').checked;const m=document.getElementById('msg');m.textContent='';try{const h=await sha256(p);if(h===PWD_HASH_HEX){(r?localStorage:sessionStorage).setItem(GATE_KEY,'1');openApp()}else{m.textContent='❌ كلمة مرور غير صحيحة'}}catch(e){m.textContent='حدث خطأ في التحقق'}}
-function openApp(){document.getElementById('gate').style.display='none';document.getElementById('app').style.display='block';startApp()}
-(()=>{const ok=localStorage.getItem(GATE_KEY)||sessionStorage.getItem(GATE_KEY);if(ok==='1'){openApp()}})();
-document.getElementById('go').addEventListener('click',checkPwd);
-document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')checkPwd()});
+// ===== Utilities =====
+const $=s=>document.querySelector(s);
+let allowNotify=false, ws=null, ws2=null, running=false;
+const state={{ price:null, k1m:{{}}, k15m:{{}}, buf15:[], ema20:null, ema50:null, rsi:null, macd:null }};
+let lastMacdHist=null, lastSignalTs=0;
 
-// ===== Helpers =====
-function ema(arr,span){const k=2/(span+1);let out=[],prev=null;for(let i=0;i<arr.length;i++){const v=arr[i];prev=(prev==null)?v:(v*k+prev*(1-k));out.push(prev)}return out}
-function rsi(close,period=14){let gains=[],losses=[],out=new Array(close.length).fill(null);for(let i=1;i<close.length;i++){const ch=close[i]-close[i-1];gains.push(Math.max(ch,0));losses.push(Math.max(-ch,0));if(i>=period){const g=gains.slice(i-period,i).reduce((a,b)=>a+b,0)/period;const l=losses.slice(i-period,i).reduce((a,b)=>a+b,0)/period;const rs=(l===0)?100:(g/l);out[i]=100-(100/(1+rs))}}return out}
-function atr(h,l,c,period=14){const tr=[];for(let i=0;i<h.length;i++){if(i===0){tr.push(h[i]-l[i]);continue}const pc=c[i-1];tr.push(Math.max(h[i]-l[i],Math.abs(h[i]-pc),Math.abs(l[i]-pc)))}const out=new Array(h.length).fill(null);for(let i=period;i<tr.length;i++){let s=0;for(let j=i-period+1;j<=i;j++)s+=tr[j];out[i]=s/period}return out}
-function pivotsFromDay(ds){if(!ds||!ds.length)return null;const H=Math.max(...ds.map(d=>d.high));const L=Math.min(...ds.map(d=>d.low));const C=ds[ds.length-1].close;const PP=(H+L+C)/3;const R1=2*PP-L,S1=2*PP-H,R2=PP+(H-L),S2=PP-(H-L);return {PP,R1,S1,R2,S2}}
-function sessionNowUTC(){const h=new Date().getUTCHours();if(h>=7&&h<12)return 'طوكيو';if(h>=7&&h<16)return 'لندن';if(h>=13&&h<=21)return 'نيويورك';return 'هادئ'}
+function showErr(msg){{ const e=$('#err'); e.textContent=msg; e.style.display='block'; }}
+function hideErr(){{ const e=$('#err'); e.style.display='none'; }}
 
-// ===== Data (PAXGUSDT as proxy for XAUUSD) =====
-let useProxy=false; let autoTimer=null; let ws=null; let lastSignalTime=0; let layers={EMA20:true,EMA50:true,Pivots:true};
-function klineURL(){const base='https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=15m&limit=500';return useProxy?('https://api.allorigins.win/raw?url='+encodeURIComponent(base)):base}
-async function fetchPAXG(){try{const rsp=await fetch(klineURL());if(!rsp.ok) throw new Error('HTTP '+rsp.status);const arr=await rsp.json();return arr.map(x=>({time:new Date(x[0]),open:+x[1],high:+x[2],low:+x[3],close:+x[4]}))}catch(e){showErr('فشل جلب الشموع: '+e.message+(useProxy?' (Proxy)':''));return null}}
+function ema(arr, span){{ const k=2/(span+1); let out=[], prev=null; for(let i=0;i<arr.length;i++){{ const v=arr[i]; prev=(prev==null)?v:(v*k+prev*(1-k)); out.push(prev);}} return out; }}
+function rsi(arr, p=14){{ let g=[],l=[],o=new Array(arr.length).fill(null); for(let i=1;i<arr.length;i++){{ const ch=arr[i]-arr[i-1]; g.push(Math.max(ch,0)); l.push(Math.max(-ch,0)); if(i>=p){{ const G=g.slice(i-p,i).reduce((a,b)=>a+b,0)/p; const L=l.slice(i-p,i).reduce((a,b)=>a+b,0)/p; const rs=(L===0)?100:(G/L); o[i]=100-(100/(1+rs)); }} }} return o; }}
+function macd(arr, f=12,s=26,sg=9){{ const ef=ema(arr,f), es=ema(arr,s); const m=ef.map((v,i)=>v-es[i]); const sgm=ema(m,sg); const h=m.map((v,i)=>v-sgm[i]); return {{m, s:sgm, h}}; }}
 
-// ===== Chart (SVG) =====
-const svg=document.getElementById('svg'); let DATA=[]; let pivShapes=[];
-function draw(){svg.innerHTML=''; hideErr(); document.getElementById('session').textContent=sessionNowUTC();
- const W=svg.clientWidth||svg.parentNode.clientWidth||360, H=svg.clientHeight||520;
- const m={l:56,r:20,t:16,b:22}, iw=Math.max(200,W-m.l-m.r), ih=Math.max(200,H-m.t-m.b);
- if(!DATA||DATA.length<2){showErr('لا توجد بيانات كافية للرسم.');return}
- const x=DATA.map(d=>d.time.getTime()), o=DATA.map(d=>d.open), h=DATA.map(d=>d.high), l=DATA.map(d=>d.low), c=DATA.map(d=>d.close);
- const e20=ema(c,20), e50=ema(c,50), R=rsi(c,14), A=atr(h,l,c,14);
- // per-day grouping for pivots
- const byDay={}; DATA.forEach(d=>{const k=d.time.toISOString().slice(0,10);(byDay[k]=byDay[k]||[]).push({high:d.high,low:d.low,close:d.close})});
- const days=Object.keys(byDay).sort(); const prev=days.length>1?byDay[days[days.length-2]]:null; const piv=prev?pivotsFromDay(prev):null;
- // scales
- const yHigh=Math.max(...h), yLow=Math.min(...l), pad=(yHigh-yLow)*0.05, Ymax=yHigh+pad, Ymin=yLow-pad;
- const sx=t=> m.l+((t-x[0])/(x[x.length-1]-x[0]))*iw, sy=v=> m.t+(1-(v-Ymin)/(Ymax-Ymin))*ih;
- // grid
- const g=document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('class','grid'); svg.appendChild(g);
- const ticks=6; for(let i=0;i<=ticks;i++){ const val=Ymin+i*(Ymax-Ymin)/ticks, yy=sy(val);
-  const ln=document.createElementNS('http://www.w3.org/2000/svg','line'); ln.setAttribute('x1',m.l); ln.setAttribute('x2',m.l+iw); ln.setAttribute('y1',yy); ln.setAttribute('y2',yy); ln.setAttribute('stroke','#2a2f36'); g.appendChild(ln);
-  const tx=document.createElementNS('http://www.w3.org/2000/svg','text'); tx.setAttribute('x',m.l-6); tx.setAttribute('y',yy+3); tx.setAttribute('class','axis'); tx.setAttribute('text-anchor','end'); tx.textContent=val.toFixed(2); svg.appendChild(tx); }
- // candles
- const cw=Math.max(3, iw/x.length*0.7);
- for(let i=0;i<DATA.length;i++){
-  const d=DATA[i], X=sx(x[i]);
-  const w=document.createElementNS('http://www.w3.org/2000/svg','line'); w.setAttribute('x1',X); w.setAttribute('x2',X);
-  w.setAttribute('y1',sy(d.low)); w.setAttribute('y2',sy(d.high)); w.setAttribute('stroke','#9aa4b2'); w.setAttribute('stroke-width','1'); svg.appendChild(w);
-  const up=d.close>=d.open, color=up?'var(--up)':'var(--dn)'; const y0=sy(d.open), y1=sy(d.close); const hh=Math.max(1,Math.abs(y1-y0));
-  const b=document.createElementNS('http://www.w3.org/2000/svg','rect'); b.setAttribute('x', X-cw/2); b.setAttribute('y', Math.min(y0,y1)); b.setAttribute('width', cw); b.setAttribute('height', hh); b.setAttribute('fill', color); svg.appendChild(b);
- }
- // EMAs
- function pathFrom(xs,ys){let d='',start=false; for(let i=0;i<xs.length;i++){ if(ys[i]==null||isNaN(ys[i])) continue; const X=sx(xs[i]), Y=sy(ys[i]); d+=(start?' L ':' M ')+X+' '+Y; start=true } return d }
- const p20=pathFrom(x,e20), p50=pathFrom(x,e50);
- if(layers.EMA20){ const p=document.createElementNS('http://www.w3.org/2000/svg','path'); p.setAttribute('d',p20); p.setAttribute('stroke','#F59E0B'); p.setAttribute('fill','none'); p.setAttribute('stroke-width','1.6'); p.setAttribute('id','EMA20'); svg.appendChild(p) }
- if(layers.EMA50){ const p=document.createElementNS('http://www.w3.org/2000/svg','path'); p.setAttribute('d',p50); p.setAttribute('stroke','#3B82F6'); p.setAttribute('fill','none'); p.setAttribute('stroke-width','1.6'); p.setAttribute('id','EMA50'); svg.appendChild(p) }
- // pivots
- if(piv && layers.Pivots){ const keys=['PP','R1','S1','R2','S2']; keys.forEach(k=>{const val=piv[k]; const line=document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1',m.l); line.setAttribute('x2',m.l+iw); line.setAttribute('y1',sy(val)); line.setAttribute('y2',sy(val)); line.setAttribute('stroke','#9aa4b2'); line.setAttribute('stroke-dasharray','4 4'); svg.appendChild(line) }) }
- // legend + HUD
- const hud=document.getElementById('hud'); const n=c.length-1; const atr=A[n]||0; hud.textContent='RSI: '+(R[n]?R[n].toFixed(0):'—')+' | ATR: '+(atr && c[n]?((atr/c[n]*100).toFixed(2)+'%'):'—')+' | جلسة: '+sessionNowUTC();
- // signals
- const sig=evalSignal(c,e20,e50,R,A,piv);
- const box=document.getElementById('sig'); box.style.display='none';
- if(sig){ box.style.display='block'; box.textContent='⚡ '+sig.type+' | '+sig.reason+' | Entry '+sig.entry.toFixed(2)+' | SL '+sig.sl.toFixed(2)+' | TP1 '+sig.tp1.toFixed(2)+' | TP2 '+sig.tp2.toFixed(2);
-  if(Notification.permission==='granted' && (Date.now()-lastSignalTime>60000)){ new Notification('XAU (via PAXG): '+sig.type, {body: sig.reason+' — Entry '+sig.entry.toFixed(2)}); lastSignalTime=Date.now(); }
- }
-}
+function fmt(x, d=2){{ return (x==null||isNaN(x))?'—':(+x).toFixed(d); }}
+function pushSignal(sig){{ const box=$('#signals'); const el=document.createElement('div'); el.className='sig '+(sig.type==='SELL'?'sell':''); el.innerHTML = `
+  <div><b>TYPE:</b> $TYPE | <b>السعر:</b> $PRICE | <b>RSI:</b> $RSI | <b>MACD H:</b> $HIST</div>
+  <div style='font-size:.9rem;color:#9aa4b2'>$TIME — شرط: $REASON</div>`
+  .replace('$TYPE', sig.type)
+  .replace('$PRICE', fmt(sig.price))
+  .replace('$RSI', fmt(sig.rsi,0))
+  .replace('$HIST', fmt(sig.hist,3))
+  .replace('$TIME', new Date(sig.ts).toLocaleString())
+  .replace('$REASON', sig.reason);
+  box.prepend(el);
+}}
 
-function evalSignal(close,e20,e50,r,a,piv){ const n=close.length-1; if(n<2||!piv) return null; const last=close[n]; const trendUp=e20[n]>e50[n] && last>e50[n]; const trendDn=e20[n]<e50[n] && last<e50[n]; const rsi=r[n]; const atr=a[n]||0; if(!rsi||!atr) return null; const margin=0.2*atr; if(trendUp && rsi>50 && rsi<70 && last>(piv.R1+margin)){ const entry=last, sl=Math.min(close[n-1], entry-1.5*atr), tp1=entry+1*atr, tp2=entry+2*atr; return {type:'BUY',entry,sl,tp1,tp2,reason:'اختراق R1 + اتجاه صاعد'} } if(trendDn && rsi>30 && rsi<50 && last<(piv.S1-margin)){ const entry=last, sl=Math.max(close[n-1], entry+1.5*atr), tp1=entry-1*atr, tp2=entry-2*atr; return {type:'SELL',entry,sl,tp1,tp2,reason:'كسر S1 + اتجاه هابط'} } return null }
+async function sendWebhook(payload){{ try{{ const url=localStorage.getItem('xau_webhook'); if(!url) return; await fetch(url,{{method:'POST', headers:{{'Content-Type':'application/json'}}, body:JSON.stringify(payload)}}); }}catch(e){{ /* ignore */ }} }}
 
-function showErr(msg){ const e=document.getElementById('err'); e.textContent=msg; e.style.display='block' }
-function hideErr(){ const e=document.getElementById('err'); e.style.display='none' }
+function notify(sig){{ if(allowNotify && Notification.permission==='granted'){{ new Notification(`XAU: ${{sig.type}} @ ${{fmt(sig.price)}}`, {{ body: sig.reason }}); }} }}
 
-async function refresh(){ const d=await fetchPAXG(); if(d&&d.length){ DATA=d; draw() } }
-function startAuto(){ if(autoTimer) clearInterval(autoTimer); autoTimer=setInterval(refresh, 120000) }
-function stopAuto(){ if(autoTimer) clearInterval(autoTimer); autoTimer=null }
+function updateUI(){{ $('#live').textContent = state.price? Number(state.price).toLocaleString('en-US',{{maximumFractionDigits:2}}) : '—';
+  const closes = state.buf15.map(b=>b.c);
+  const e20 = ema(closes,20), e50 = ema(closes,50); state.ema20=e20.at(-1); state.ema50=e50.at(-1);
+  const r = rsi(closes,14); state.rsi=r.at(-1);
+  const M = macd(closes); const hist=M.h.at(-1); state.macd={{m:M.m.at(-1), s:M.s.at(-1), h:hist}};
+  $('#ema20').textContent = fmt(state.ema20);
+  $('#ema50').textContent = fmt(state.ema50);
+  $('#rsi').textContent   = fmt(state.rsi,0);
+  $('#macd').textContent  = `MACD ${{fmt(M.m.at(-1),3)}} | Sig ${{fmt(M.s.at(-1),3)}} | Hist ${{fmt(hist,3)}}`;
+}}
 
-function startWS(){ try{ ws=new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker'); ws.onmessage=(ev)=>{ const o=JSON.parse(ev.data); if(o&&o.c){ document.getElementById('livePrice').textContent='PAXG '+parseFloat(o.c).toLocaleString('en-US',{maximumFractionDigits:2}); } }; ws.onclose=()=> setTimeout(startWS, 5000); }catch(e){} }
+function maybeSignal(){{ if(state.buf15.length<60) return; const now=Date.now(); if(now - lastSignalTs < 60000) return; // 1m throttle
+  const closes = state.buf15.map(b=>b.c);
+  const e20 = ema(closes,20).at(-1), e50 = ema(closes,50).at(-1);
+  const r = rsi(closes,14).at(-1);
+  const M = macd(closes); const hist = M.h.at(-1), prevHist = M.h.at(-2);
+  if(hist==null || prevHist==null || r==null) return;
+  let sig=null;
+  if(e20>e50 && prevHist<=0 && hist>0 && r>=50 && r<=70){{ sig={{type:'BUY', price:state.price, rsi:r, hist:hist, ts:now, reason:'تقاطع MACD صعودي + EMA20>EMA50 + RSI[50..70]'}}; }}
+  else if(e20<e50 && prevHist>=0 && hist<0 && r>=30 && r<=50){{ sig={{type:'SELL', price:state.price, rsi:r, hist:hist, ts:now, reason:'تقاطع MACD هبوطي + EMA20<EMA50 + RSI[30..50]'}}; }}
+  if(sig){{ lastSignalTs=now; pushSignal(sig); notify(sig); sendWebhook({{symbol:'XAU (PAXGUSDT)', ...sig}}); }}
+}}
 
-function startApp(){
-  document.getElementById('btnRefresh').addEventListener('click', refresh);
-  const tgl=document.getElementById('btnAuto'); tgl.addEventListener('click',()=>{ tgl.classList.toggle('active'); if(tgl.classList.contains('active')) startAuto(); else stopAuto(); });
-  document.getElementById('btnProxy').addEventListener('click',(e)=>{ useProxy=!useProxy; e.target.classList.toggle('active', useProxy); refresh(); });
-  document.getElementById('btnLogout').addEventListener('click',()=>{ localStorage.removeItem(GATE_KEY); sessionStorage.removeItem(GATE_KEY); location.reload(); });
-  document.getElementById('btnNotify').addEventListener('click', async ()=>{ try{ const p=await Notification.requestPermission(); if(p==='granted'){ new Notification('تم تفعيل إشعارات المتصفح'); document.getElementById('btnNotify').classList.add('active'); } }catch(e){} });
-  document.querySelectorAll('.toggle[data-layer]').forEach(btn=>{ btn.addEventListener('click',()=>{ btn.classList.toggle('active'); const id=btn.getAttribute('data-layer'); layers[id]=btn.classList.contains('active'); draw(); }); });
-  refresh(); startWS();
-  window.addEventListener('resize', ()=>{ if(DATA&&DATA.length) draw(); });
-}
+function onKline15(ev){{ try{{ const o = JSON.parse(ev.data); const d = o.data || o; if(!d.k) return; const k=d.k; if(k.s!=='PAXGUSDT' || k.i!=='15m') return; // build buffer of closed klines
+  const item={{t:k.t, o:+k.o, h:+k.h, l:+k.l, c:+k.c, x:k.x}};
+  const idx = state.buf15.findIndex(b=>b.t===item.t);
+  if(idx>=0) state.buf15[idx]=item; else state.buf15.push(item);
+  if(state.buf15.length>200) state.buf15 = state.buf15.slice(-200);
+  updateUI(); if(k.x && running) maybeSignal();
+ }}catch(e){{ /* ignore */ }} }}
+
+function onTicker(ev){{ try{{ const o = JSON.parse(ev.data); const d = o.data || o; if(d.c){{ state.price = d.c; updateUI(); }} }}catch(e){{}} }}
+
+function start(){{ if(ws||ws2) return; hideErr(); running=true;
+  try{{
+    ws  = new WebSocket('wss://stream.binance.com:9443/stream?streams=paxgusdt@kline_15m');
+    ws.onmessage = onKline15; ws.onclose=()=>{{ ws=null; if(running) setTimeout(start, 1500); }};
+    ws.onerror = ()=>{{ showErr('تعذر الاتصال بقناة Kline 15m. سيعاد المحاولة.'); }};
+    ws2 = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker');
+    ws2.onmessage = onTicker; ws2.onclose=()=>{{ ws2=null; if(running) setTimeout(start, 1500); }};
+  }}catch(e){{ showErr('WebSocket فشل: '+e.message); }}
+}}
+function stop(){{ running=false; if(ws){{ try{{ ws.close(); }}catch(_ ){{}} ws=null; }} if(ws2){{ try{{ ws2.close(); }}catch(_ ){{}} ws2=null; }} }}
+
+$('#start').addEventListener('click',()=>{{ const b=$('#start'); b.classList.toggle('active'); if(b.classList.contains('active')){{ b.textContent='إيقاف الإشارات'; start(); }} else {{ b.textContent='بدء الإشارات'; stop(); }}});
+$('#notify').addEventListener('click', async ()=>{{ try{{ const p=await Notification.requestPermission(); allowNotify = (p==='granted'); $('#notify').classList.toggle('active', allowNotify); if(allowNotify) new Notification('تم تفعيل الإشعارات المباشرة'); }}catch(e){{}} }});
+$('#save').addEventListener('click',()=>{{ const url=$('#webhook').value.trim(); if(url){{ localStorage.setItem('xau_webhook', url); alert('تم الحفظ'); }} }});
+$('#test').addEventListener('click',()=>{{ const url=localStorage.getItem('xau_webhook'); if(!url) return alert('أضف رابط Webhook أولاً'); sendWebhook({{test:true, msg:'Ping from XAU signal page', t:Date.now()}}); alert('تم إرسال اختبار'); }});
+
+(()=>{{ const u=localStorage.getItem('xau_webhook'); if(u) $('#webhook').value=u; }})();
 </script>
 </body>
 </html>
