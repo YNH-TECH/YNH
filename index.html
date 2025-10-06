@@ -1,156 +1,207 @@
 <!DOCTYPE html>
-<html lang='ar' dir='rtl'>
+<html lang="ar" dir="rtl">
 <head>
-<meta charset='utf-8'/>
-<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
-<title>XAU — إشعارات فورية بدون شموع (PAXGUSDT/BNB WS)</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<title>XAU — لوحة مؤشرات متعددة الأُطُر الزمنية (WS فقط)</title>
 <style>
 :root{--bg:#0d1117;--card:#161b22;--border:#30363d;--txt:#e6edf3;--muted:#9aa4b2;--brand:#0f6cbd;--up:#16a34a;--dn:#ef4444}
 html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'Segoe UI',Tahoma,Arial;margin:0}
 header{position:sticky;top:0;z-index:10;background:var(--brand);color:#fff;padding:.7rem .9rem}
 header h1{margin:0;font-size:1rem}
 .small{font-size:.85rem;opacity:.92}
-.container{padding:1rem .9rem 2rem;display:grid;gap:.9rem}
+.container{padding:1rem .9rem 1.4rem;display:grid;gap:.9rem}
 .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem}
 .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
 .badge{background:#111827;border:1px solid #374151;padding:.35rem .55rem;border-radius:999px;font-size:.85rem}
 .btn,.toggle{background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:10px;padding:.55rem .7rem;font-size:.95rem;cursor:pointer}
 .toggle.active{background:#0a5ea8;border-color:#0a5ea8}
-.price{font-weight:700;font-size:1.35rem}
-.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:.5rem}
-.kv div{background:#0f172a;border:1px solid #243045;border-radius:8px;padding:.5rem .6rem;font-size:.95rem}
-.kv b{display:block;color:#9ca3af;font-weight:600;margin-bottom:.2rem}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.55rem;margin-top:.6rem}
+.kv .it{background:#0f172a;border:1px solid #243045;border-radius:10px;padding:.55rem .6rem}
+.kv .it b{display:block;color:#9ca3af;font-weight:600;margin-bottom:.25rem}
+.title{font-weight:700;color:#e5e7eb;margin-bottom:.35rem}
+.section{margin-top:.3rem}
+.price{font-weight:700}
+.err{background:#4b1d1d;border:1px solid #8a2b2b;border-radius:10px;padding:.5rem .7rem;display:none}
+.ok{background:#15321f;border:1px solid #28543a;border-radius:10px;padding:.4rem .6rem;display:none}
 .sig{border-left:4px solid #10b981;padding-left:.6rem}
 .sig.sell{border-color:#ef4444}
 .list{display:grid;gap:.5rem}
 .input{flex:1;min-width:260px;background:#0b1220;border:1px solid #334155;border-radius:10px;padding:.55rem .7rem;color:#e5e7eb}
-.err{background:#4b1d1d;border:1px solid #8a2b2b;border-radius:10px;padding:.5rem .7rem;display:none}
+.sep{height:1px;background:#253244;margin:.6rem 0}
 </style>
 </head>
 <body>
 <header>
-  <h1>XAU — إشعارات فورية بدون رسم شموع (آخر تحديث: 2025-10-06 13:26)</h1>
-  <div class='small'>المصدر: <b>Binance WebSocket</b> لسعر PAXGUSDT + Kline 1m/15m لإشارات RSI/EMA/MACD. لا حاجة لـ REST، لتفادي مشاكل CORS.</div>
+  <h1>XAU — مؤشرات رقمية متعدد الأطر (آخر تحديث: 2025-10-06 14:57)</h1>
+  <div class="small">المصدر: <b>Binance WebSocket</b> لقنوات <b>kline</b> لـ 5م/15م/1س/4س والسعر الحي؛ بدون REST لتفادي CORS. الرمز المستعمل: <b>PAXGUSDT</b> كوكيل لحركة الذهب.</div>
 </header>
-<div class='container'>
+<div class="container">
 
-  <div id='err' class='err'></div>
+  <div id="err" class="err"></div>
+  <div id="ok" class="ok"></div>
 
-  <section class='panel'>
-    <div class='row'>
-      <span class='badge'>رمز: PAXGUSDT ≈ XAUUSD</span>
-      <span class='badge'>فاصل الإشارات: 15m</span>
-      <span class='badge'>حجم نافذة 15m: 200</span>
-      <span class='badge'>سعر حي: <span id='live' class='price'>—</span></span>
-      <span style='flex:1'></span>
-      <button id='start' class='toggle'>بدء الإشارات</button>
-      <button id='notify' class='toggle'>تفعيل إشعارات المتصفح</button>
+  <section class="panel">
+    <div class="row">
+      <span class="badge">سعر حي: <span id="live" class="price">—</span></span>
+      <span class="badge">آخر تحديث: <span id="updated">—</span></span>
+      <span class="badge">حالة الاتصال: <span id="status">—</span></span>
+      <span style="flex:1"></span>
+      <button id="start" class="toggle">بدء</button>
+      <button id="notify" class="toggle">تفعيل إشعارات المتصفح</button>
+      <button id="save" class="btn">حفظ Webhook</button>
+      <input id="webhook" class="input" placeholder="اختياري: Webhook (IFTTT/Power Automate)"/>
     </div>
-    <div class='row' style='margin-top:.6rem'>
-      <input id='webhook' class='input' placeholder='اختياري: Webhook لرسائل البريد/الموبايل (IFTTT/Power Automate)'/>
-      <button id='save' class='btn'>حفظ</button>
-      <button id='test' class='btn'>اختبار إرسال</button>
-    </div>
-  </section>
-
-  <section class='panel'>
-    <div class='row'><b>مؤشرات 15m (مباشر):</b></div>
-    <div class='kv'>
-      <div><b>EMA20</b><span id='ema20'>—</span></div>
-      <div><b>EMA50</b><span id='ema50'>—</span></div>
-      <div><b>RSI(14)</b><span id='rsi'>—</span></div>
-      <div><b>MACD(12,26,9)</b><span id='macd'>—</span></div>
+    <div class="row" style="margin-top:.5rem">
+      <button id="recalc" class="btn">إعادة حساب الآن</button>
+      <button id="every3m" class="toggle">تحديث كل 3 دقائق</button>
     </div>
   </section>
 
-  <section class='panel'>
-    <div class='row'><b>آخر الإشارات:</b></div>
-    <div id='signals' class='list'></div>
+  <section class="panel">
+    <div class="title">فاصل 5 دقائق (5m)</div>
+    <div class="kv" id="tf-5m"></div>
+  </section>
+
+  <section class="panel">
+    <div class="title">فاصل 15 دقيقة (15m)</div>
+    <div class="kv" id="tf-15m"></div>
+  </section>
+
+  <section class="panel">
+    <div class="title">فاصل 1 ساعة (1h) — للتأكيد</div>
+    <div class="kv" id="tf-1h"></div>
+  </section>
+
+  <section class="panel">
+    <div class="title">فاصل 4 ساعات (4h) — للتأكيد</div>
+    <div class="kv" id="tf-4h"></div>
+  </section>
+
+  <section class="panel">
+    <div class="title">آخر الإشارات (قواعد: 5م/15م إشارة أساسية + تأكيد 1س/4س)</div>
+    <div id="signals" class="list"></div>
   </section>
 
 </div>
 
 <script>
-// ===== Utilities =====
+'use strict';
 const $=s=>document.querySelector(s);
-let allowNotify=false, ws=null, ws2=null, running=false;
-const state={{ price:null, k1m:{{}}, k15m:{{}}, buf15:[], ema20:null, ema50:null, rsi:null, macd:null }};
-let lastMacdHist=null, lastSignalTs=0;
+const TFs=['5m','15m','1h','4h'];
+const bufs={ '5m':[], '15m':[], '1h':[], '4h':[] };
+let ws=null, wsTicker=null, running=false, allowNotify=false, timer3m=null, lastSigTs=0;
+let lastPrice=null;
 
-function showErr(msg){{ const e=$('#err'); e.textContent=msg; e.style.display='block'; }}
-function hideErr(){{ const e=$('#err'); e.style.display='none'; }}
+function showErr(msg){ const e=$('#err'); e.textContent=msg; e.style.display='block'; }
+function hideErr(){ const e=$('#err'); e.style.display='none'; }
+function showOk(msg){ const e=$('#ok'); e.textContent=msg; e.style.display='block'; setTimeout(()=>{e.style.display='none'},2000); }
 
-function ema(arr, span){{ const k=2/(span+1); let out=[], prev=null; for(let i=0;i<arr.length;i++){{ const v=arr[i]; prev=(prev==null)?v:(v*k+prev*(1-k)); out.push(prev);}} return out; }}
-function rsi(arr, p=14){{ let g=[],l=[],o=new Array(arr.length).fill(null); for(let i=1;i<arr.length;i++){{ const ch=arr[i]-arr[i-1]; g.push(Math.max(ch,0)); l.push(Math.max(-ch,0)); if(i>=p){{ const G=g.slice(i-p,i).reduce((a,b)=>a+b,0)/p; const L=l.slice(i-p,i).reduce((a,b)=>a+b,0)/p; const rs=(L===0)?100:(G/L); o[i]=100-(100/(1+rs)); }} }} return o; }}
-function macd(arr, f=12,s=26,sg=9){{ const ef=ema(arr,f), es=ema(arr,s); const m=ef.map((v,i)=>v-es[i]); const sgm=ema(m,sg); const h=m.map((v,i)=>v-sgm[i]); return {{m, s:sgm, h}}; }}
+// === Math / Indicators ===
+const sma=(arr,n)=>{ if(arr.length<n) return Array(arr.length).fill(null); const out=[]; let sum=0; for(let i=0;i<arr.length;i++){ sum+=arr[i]; if(i>=n) sum-=arr[i-n]; out.push(i>=n-1? (sum/n):null); } return out; };
+function ema(arr,n){ const k=2/(n+1); const out=[]; let prev=null; for(let i=0;i<arr.length;i++){ const v=arr[i]; prev = (prev==null)? v : (v*k + prev*(1-k)); out.push(prev);} return out; }
+function rsi(closes, n=14){ const out=new Array(closes.length).fill(null); let gain=0, loss=0; for(let i=1;i<closes.length;i++){ const ch=closes[i]-closes[i-1]; const g=Math.max(ch,0), l=Math.max(-ch,0); if(i<=n){ gain+=g; loss+=l; if(i==n){ const rs=(loss===0)?100:(gain/n)/(loss/n); out[i]=100-(100/(1+rs)); } } else { const avgG = ( (out[i-1]!=null) ? ( (gain*(n-1)+g)/n ) : null ); const avgL = ( (out[i-1]!=null) ? ( (loss*(n-1)+l)/n ) : null ); gain=avgG*n; loss=avgL*n; const rs=(avgL===0)?100:avgG/avgL; out[i]=100-(100/(1+rs)); }
+ }
+ return out; }
+function macd(closes, f=12, s=26, sig=9){ const ef=ema(closes,f), es=ema(closes,s); const mac=ef.map((v,i)=>v-es[i]); const signal=ema(mac,sig); const hist=mac.map((v,i)=> v-(signal[i]||0)); return {mac, signal, hist}; }
+function atr(highs,lows,closes,n=14){ const tr=[]; for(let i=0;i<highs.length;i++){ if(i==0){ tr.push(highs[i]-lows[i]); } else { const pc=closes[i-1]; tr.push(Math.max(highs[i]-lows[i], Math.abs(highs[i]-pc), Math.abs(lows[i]-pc))); } }
+ const out=new Array(tr.length).fill(null); let sum=0; for(let i=0;i<tr.length;i++){ sum+=tr[i]; if(i>=n){ sum-=tr[i-n]; } out[i]= i>=n-1? (sum/n):null; } return out; }
+function adx(highs,lows,closes,n=14){ const plusDM=[null], minusDM=[null], TR=[null]; for(let i=1;i<highs.length;i++){ const up=highs[i]-highs[i-1], dn=lows[i-1]-lows[i]; plusDM[i]= (up>dn && up>0)? up:0; minusDM[i]=(dn>up && dn>0)? dn:0; const tr=Math.max(highs[i]-lows[i], Math.abs(highs[i]-closes[i-1]), Math.abs(lows[i]-closes[i-1])); TR[i]=tr; }
+ function wilder(arr){ const out=new Array(arr.length).fill(null); let sum=0; for(let i=1;i<arr.length;i++){ sum+= (arr[i]||0); if(i==n){ out[i]=sum; } else if(i>n){ out[i]= out[i-1] - (out[i-1]/n) + (arr[i]||0); } }
+ return out; }
+ const smTR=wilder(TR), smPlus=wilder(plusDM), smMinus=wilder(minusDM); const pDI=[], mDI=[], DX=[]; for(let i=0;i<highs.length;i++){ if(smTR[i] && smTR[i]!=0){ pDI[i]=100*(smPlus[i]/smTR[i]); mDI[i]=100*(smMinus[i]/smTR[i]); DX[i]=100*(Math.abs(pDI[i]-mDI[i])/(pDI[i]+mDI[i])); } else { pDI[i]=mDI[i]=DX[i]=null; } }
+ // ADX smoothing of DX
+ const adxArr=new Array(DX.length).fill(null); let s=0; for(let i=0;i<DX.length;i++){ if(i<n){ s+= (DX[i]||0); if(i==n-1) adxArr[i]= s/n; } else if(i>n-1){ adxArr[i]= ((adxArr[i-1]*(n-1)) + (DX[i]||0))/n; } }
+ return {pDI, mDI, adx:adxArr}; }
+function stoch(highs,lows,closes,n=14,kSmooth=3,dSmooth=3){ const kArr=new Array(closes.length).fill(null); for(let i=n-1;i<closes.length;i++){ const hh=Math.max(...highs.slice(i-n+1,i+1)); const ll=Math.min(...lows.slice(i-n+1,i+1)); kArr[i]= (hh==ll)? 50 : ((closes[i]-ll)/(hh-ll))*100; }
+ const K=sma(kArr.map(v=>v==null?0:v),kSmooth); const D=sma(K.map(v=>v==null?0:v),dSmooth); return {K, D}; }
+function cci(highs,lows,closes, n=20){ const tp=closes.map((c,i)=>(highs[i]+lows[i]+c)/3); const ma=sma(tp,n); const out=new Array(closes.length).fill(null); for(let i=0;i<closes.length;i++){ if(i>=n-1){ const md = tp.slice(i-n+1,i+1).reduce((acc,v,idx)=> acc+Math.abs(v - ma[i]), 0)/n; out[i]= (tp[i]-ma[i])/(0.015*md); } }
+ return out; }
+function mfi(highs,lows,closes,volumes,n=14){ const tp=closes.map((c,i)=>(highs[i]+lows[i]+c)/3); const pos=[],neg=[]; for(let i=1;i<closes.length;i++){ const mf=tp[i]*volumes[i]; if(tp[i]>tp[i-1]){ pos.push(mf); neg.push(0); } else if(tp[i]<tp[i-1]){ pos.push(0); neg.push(mf); } else { pos.push(0); neg.push(0);} }
+ const out=new Array(closes.length).fill(null); for(let i=n;i<closes.length;i++){ const ps=pos.slice(i-n, i).reduce((a,b)=>a+b,0); const ns=neg.slice(i-n, i).reduce((a,b)=>a+b,0); const mfr = ns==0? 100 : ps/ns; out[i]= 100 - (100/(1+mfr)); }
+ return out; }
+function bb(closes,n=20,mult=2){ const mid=sma(closes,n); const out=new Array(closes.length).fill(null); const up=[], low=[], pctB=[]; for(let i=0;i<closes.length;i++){ if(i>=n-1){ const slice=closes.slice(i-n+1,i+1); const mean=mid[i]; const sd=Math.sqrt(slice.reduce((a,v)=>a+Math.pow(v-mean,2),0)/n); const u=mean+mult*sd, l=mean-mult*sd; up[i]=u; low[i]=l; pctB[i]=(u==l)?0.5: ( (closes[i]-l)/(u-l) ); } else { up[i]=low[i]=pctB[i]=null; }
+ }
+ return {mid, up, low, pctB}; }
 
-function fmt(x, d=2){{ return (x==null||isNaN(x))?'—':(+x).toFixed(d); }}
-function pushSignal(sig){{ const box=$('#signals'); const el=document.createElement('div'); el.className='sig '+(sig.type==='SELL'?'sell':''); el.innerHTML = `
-  <div><b>TYPE:</b> $TYPE | <b>السعر:</b> $PRICE | <b>RSI:</b> $RSI | <b>MACD H:</b> $HIST</div>
-  <div style='font-size:.9rem;color:#9aa4b2'>$TIME — شرط: $REASON</div>`
-  .replace('$TYPE', sig.type)
-  .replace('$PRICE', fmt(sig.price))
-  .replace('$RSI', fmt(sig.rsi,0))
-  .replace('$HIST', fmt(sig.hist,3))
-  .replace('$TIME', new Date(sig.ts).toLocaleString())
-  .replace('$REASON', sig.reason);
-  box.prepend(el);
-}}
+function computeAll(tf){ const b=bufs[tf]; if(!b || b.length<60) return null; const c=b.map(d=>d.c), h=b.map(d=>d.h), l=b.map(d=>d.l), v=b.map(d=>d.v);
+ const ema20=ema(c,20).at(-1), ema50=ema(c,50).at(-1); const sma20=sma(c,20).at(-1), sma50=sma(c,50).at(-1);
+ const r=rsi(c,14).at(-1);
+ const M=macd(c); const mac=M.mac.at(-1), sig=M.signal.at(-1), hist=M.hist.at(-1);
+ const A=atr(h,l,c,14).at(-1); const aPct= (A && c.at(-1))? (A/c.at(-1)*100):null;
+ const D=adx(h,l,c,14); const adxv=D.adx.at(-1), pdi=D.pDI.at(-1), mdi=D.mDI.at(-1);
+ const S=stoch(h,l,c,14,3,3); const k=S.K.at(-1), d=S.D.at(-1);
+ const C=cci(h,l,c,20).at(-1);
+ const F=mfi(h,l,c,v,14).at(-1);
+ const B=bb(c,20,2); const mid=B.mid.at(-1), up=B.up.at(-1), low=B.low.at(-1), pctB=B.pctB.at(-1);
+ return {price:c.at(-1), ema20, ema50, sma20, sma50, rsi:r, macd:mac, macdsig:sig, macdhist:hist, atr:A, atrpct:aPct, adx:adxv, pdi, mdi, stochK:k, stochD:d, cci:C, mfi:F, bbmid:mid, bbup:up, bblow:low, bbp:pctB}; }
 
-async function sendWebhook(payload){{ try{{ const url=localStorage.getItem('xau_webhook'); if(!url) return; await fetch(url,{{method:'POST', headers:{{'Content-Type':'application/json'}}, body:JSON.stringify(payload)}}); }}catch(e){{ /* ignore */ }} }}
+function renderTF(tf){ const box=$('#tf-'+tf); const d=computeAll(tf); const fmt=(x,dp=2)=> (x==null || isNaN(x))?'—':(+x).toFixed(dp);
+ if(!d){ box.innerHTML='<div class="it">جاري تجميع البيانات…</div>'; return; }
+ const rows=[
+  ['السعر', fmt(d.price)],
+  ['EMA20', fmt(d.ema20)], ['EMA50', fmt(d.ema50)],
+  ['SMA20', fmt(d.sma20)], ['SMA50', fmt(d.sma50)],
+  ['RSI(14)', fmt(d.rsi,0)],
+  ['MACD', fmt(d.macd,3)], ['Signal', fmt(d.macdsig,3)], ['Hist', fmt(d.macdhist,3)],
+  ['ATR(14)', fmt(d.atr,2)], ['ATR%', fmt(d.atrpct,2)+'%'],
+  ['ADX(14)', fmt(d.adx,0)], ['+DI', fmt(d.pdi,0)], ['-DI', fmt(d.mdi,0)],
+  ['Stoch %K', fmt(d.stochK,0)], ['Stoch %D', fmt(d.stochD,0)],
+  ['CCI(20)', fmt(d.cci,0)], ['MFI(14)', fmt(d.mfi,0)],
+  ['BB mid', fmt(d.bbmid,2)], ['BB up', fmt(d.bbup,2)], ['BB low', fmt(d.bblow,2)], ['%B', fmt(d.bbp,2)]
+ ];
+ box.innerHTML = rows.map(([k,v])=> `<div class="it"><b>${k}</b>${v}</div>`).join('');
+}
 
-function notify(sig){{ if(allowNotify && Notification.permission==='granted'){{ new Notification(`XAU: ${{sig.type}} @ ${{fmt(sig.price)}}`, {{ body: sig.reason }}); }} }}
+function renderAll(){ TFs.forEach(renderTF); $('#updated').textContent = new Date().toLocaleTimeString(); }
 
-function updateUI(){{ $('#live').textContent = state.price? Number(state.price).toLocaleString('en-US',{{maximumFractionDigits:2}}) : '—';
-  const closes = state.buf15.map(b=>b.c);
-  const e20 = ema(closes,20), e50 = ema(closes,50); state.ema20=e20.at(-1); state.ema50=e50.at(-1);
-  const r = rsi(closes,14); state.rsi=r.at(-1);
-  const M = macd(closes); const hist=M.h.at(-1); state.macd={{m:M.m.at(-1), s:M.s.at(-1), h:hist}};
-  $('#ema20').textContent = fmt(state.ema20);
-  $('#ema50').textContent = fmt(state.ema50);
-  $('#rsi').textContent   = fmt(state.rsi,0);
-  $('#macd').textContent  = `MACD ${{fmt(M.m.at(-1),3)}} | Sig ${{fmt(M.s.at(-1),3)}} | Hist ${{fmt(hist,3)}}`;
-}}
+function maybeSignal(){ // Base on 5m/15m; confirm by 1h/4h
+ const d5=computeAll('5m'), d15=computeAll('15m'), d1=computeAll('1h'), d4=computeAll('4h'); if(!d5||!d15||!d1||!d4) return;
+ const now=Date.now(); if(now-lastSigTs<60000) return; // 1m throttle
+ let sig=null;
+ // BUY: 15m MACD hist cross up + EMA20>EMA50 on 5m&15m + 1h/4h EMA20>EMA50
+ if(d15.macdhist!=null && d15.macdhist>0 && d15.macd>d15.macdsig && d5.ema20>d5.ema50 && d15.ema20>d15.ema50 && d1.ema20>d1.ema50 && d4.ema20>d4.ema50){
+   sig={type:'BUY', price:lastPrice||d15.price, reason:'اتساق اتجاه (EMA20>EMA50) عبر 5م/15م/1س/4س + MACD صعودي على 15م'};
+ }
+ // SELL: 15m MACD hist down + EMA20<EMA50 on 5m&15m + 1h/4h EMA20<EMA50
+ if(!sig && d15.macdhist!=null && d15.macdhist<0 && d15.macd<d15.macdsig && d5.ema20<d5.ema50 && d15.ema20<d15.ema50 && d1.ema20<d1.ema50 && d4.ema20<d4.ema50){
+   sig={type:'SELL', price:lastPrice||d15.price, reason:'اتساق اتجاه (EMA20<EMA50) عبر 5م/15م/1س/4س + MACD هبوطي على 15م'};
+ }
+ if(sig){ lastSigTs=now; const el=document.createElement('div'); el.className='sig '+(sig.type==='SELL'?'sell':''); el.innerHTML = `<div><b>${sig.type}</b> @ ${sig.price?.toFixed?sig.price.toFixed(2):sig.price} — ${sig.reason}</div><div style="font-size:.9rem;color:#9aa4b2">${new Date().toLocaleString()}</div>`; $('#signals').prepend(el);
+   if(allowNotify && Notification.permission==='granted'){ new Notification(`XAU: ${sig.type}`, {body: `${sig.price?.toFixed?sig.price.toFixed(2):sig.price} — ${sig.reason}`}); }
+   const url=localStorage.getItem('xau_webhook'); if(url){ try{ fetch(url,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...sig, ts:now, symbol:'XAU (PAXGUSDT)'})}); }catch(e){} }
+ }
+}
 
-function maybeSignal(){{ if(state.buf15.length<60) return; const now=Date.now(); if(now - lastSignalTs < 60000) return; // 1m throttle
-  const closes = state.buf15.map(b=>b.c);
-  const e20 = ema(closes,20).at(-1), e50 = ema(closes,50).at(-1);
-  const r = rsi(closes,14).at(-1);
-  const M = macd(closes); const hist = M.h.at(-1), prevHist = M.h.at(-2);
-  if(hist==null || prevHist==null || r==null) return;
-  let sig=null;
-  if(e20>e50 && prevHist<=0 && hist>0 && r>=50 && r<=70){{ sig={{type:'BUY', price:state.price, rsi:r, hist:hist, ts:now, reason:'تقاطع MACD صعودي + EMA20>EMA50 + RSI[50..70]'}}; }}
-  else if(e20<e50 && prevHist>=0 && hist<0 && r>=30 && r<=50){{ sig={{type:'SELL', price:state.price, rsi:r, hist:hist, ts:now, reason:'تقاطع MACD هبوطي + EMA20<EMA50 + RSI[30..50]'}}; }}
-  if(sig){{ lastSignalTs=now; pushSignal(sig); notify(sig); sendWebhook({{symbol:'XAU (PAXGUSDT)', ...sig}}); }}
-}}
+function upsertK(tf, k){ // k: {t,o,h,l,c,v,x}
+ const arr=bufs[tf]; const idx=arr.findIndex(d=>d.t===k.t); if(idx>=0) arr[idx]=k; else arr.push(k); const lim = (tf==='4h'? 400 : tf==='1h'? 800 : 1200); if(arr.length>lim) bufs[tf]=arr.slice(-lim);
+}
 
-function onKline15(ev){{ try{{ const o = JSON.parse(ev.data); const d = o.data || o; if(!d.k) return; const k=d.k; if(k.s!=='PAXGUSDT' || k.i!=='15m') return; // build buffer of closed klines
-  const item={{t:k.t, o:+k.o, h:+k.h, l:+k.l, c:+k.c, x:k.x}};
-  const idx = state.buf15.findIndex(b=>b.t===item.t);
-  if(idx>=0) state.buf15[idx]=item; else state.buf15.push(item);
-  if(state.buf15.length>200) state.buf15 = state.buf15.slice(-200);
-  updateUI(); if(k.x && running) maybeSignal();
- }}catch(e){{ /* ignore */ }} }}
+function startWS(){ if(ws||wsTicker) return; hideErr(); running=true; $('#status').textContent='يتصل…';
+ const streams=['paxgusdt@kline_5m','paxgusdt@kline_15m','paxgusdt@kline_1h','paxgusdt@kline_4h'];
+ try{
+  ws = new WebSocket('wss://stream.binance.com:9443/stream?streams='+streams.join('/'));
+  ws.onopen=()=>{ $('#status').textContent='متصل'; showOk('تم الاتصال بقنوات kline'); };
+  ws.onmessage=(ev)=>{ try{ const obj=JSON.parse(ev.data); const d=obj.data; if(!d||!d.k) return; const k=d.k; const tf=k.i; if(!TFs.includes(tf)) return; const item={t:k.t, o:+k.o, h:+k.h, l:+k.l, c:+k.c, v:+k.v, x:k.x}; upsertK(tf, item); if(k.x){ renderTF(tf); maybeSignal(); } }catch(e){} };
+  ws.onclose=()=>{ ws=null; $('#status').textContent='انقطع—يعاد الاتصال'; if(running) setTimeout(startWS, 1500); };
+  ws.onerror=()=>{ showErr('فشل اتصال kline—سيعاد المحاولة'); };
+  wsTicker = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker');
+  wsTicker.onmessage=(ev)=>{ try{ const o=JSON.parse(ev.data); if(o&&o.c){ lastPrice=+o.c; $('#live').textContent= Number(lastPrice).toLocaleString('en-US',{maximumFractionDigits:2}); } }catch(e){} };
+  wsTicker.onclose=()=>{ wsTicker=null; if(running) setTimeout(startWS, 1500); };
+ }catch(e){ showErr('WebSocket خطأ: '+e.message); }
+}
+function stopWS(){ running=false; if(ws){ try{ws.close();}catch(_){}}; if(wsTicker){ try{wsTicker.close();}catch(_){}}; ws=null; wsTicker=null; $('#status').textContent='متوقف'; }
 
-function onTicker(ev){{ try{{ const o = JSON.parse(ev.data); const d = o.data || o; if(d.c){{ state.price = d.c; updateUI(); }} }}catch(e){{}} }}
+// UI
+$('#start').addEventListener('click',()=>{ const b=$('#start'); b.classList.toggle('active'); if(b.classList.contains('active')){ b.textContent='إيقاف'; startWS(); } else { b.textContent='بدء'; stopWS(); } });
+$('#notify').addEventListener('click', async ()=>{ try{ const p=await Notification.requestPermission(); allowNotify=(p==='granted'); $('#notify').classList.toggle('active', allowNotify); if(allowNotify) new Notification('تم تفعيل إشعارات الإشارات'); }catch(e){} });
+$('#save').addEventListener('click',()=>{ const url=$('#webhook').value.trim(); if(url){ localStorage.setItem('xau_webhook', url); showOk('تم حفظ Webhook'); }});
+$('#recalc').addEventListener('click',()=>{ renderAll(); maybeSignal(); });
+$('#every3m').addEventListener('click',()=>{ const b=$('#every3m'); b.classList.toggle('active'); if(b.classList.contains('active')){ timer3m=setInterval(()=>{ renderAll(); maybeSignal(); }, 180000); } else { if(timer3m) clearInterval(timer3m); } });
 
-function start(){{ if(ws||ws2) return; hideErr(); running=true;
-  try{{
-    ws  = new WebSocket('wss://stream.binance.com:9443/stream?streams=paxgusdt@kline_15m');
-    ws.onmessage = onKline15; ws.onclose=()=>{{ ws=null; if(running) setTimeout(start, 1500); }};
-    ws.onerror = ()=>{{ showErr('تعذر الاتصال بقناة Kline 15m. سيعاد المحاولة.'); }};
-    ws2 = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker');
-    ws2.onmessage = onTicker; ws2.onclose=()=>{{ ws2=null; if(running) setTimeout(start, 1500); }};
-  }}catch(e){{ showErr('WebSocket فشل: '+e.message); }}
-}}
-function stop(){{ running=false; if(ws){{ try{{ ws.close(); }}catch(_ ){{}} ws=null; }} if(ws2){{ try{{ ws2.close(); }}catch(_ ){{}} ws2=null; }} }}
+// restore webhook
+(()=>{ const u=localStorage.getItem('xau_webhook'); if(u) $('#webhook').value=u; })();
 
-$('#start').addEventListener('click',()=>{{ const b=$('#start'); b.classList.toggle('active'); if(b.classList.contains('active')){{ b.textContent='إيقاف الإشارات'; start(); }} else {{ b.textContent='بدء الإشارات'; stop(); }}});
-$('#notify').addEventListener('click', async ()=>{{ try{{ const p=await Notification.requestPermission(); allowNotify = (p==='granted'); $('#notify').classList.toggle('active', allowNotify); if(allowNotify) new Notification('تم تفعيل الإشعارات المباشرة'); }}catch(e){{}} }});
-$('#save').addEventListener('click',()=>{{ const url=$('#webhook').value.trim(); if(url){{ localStorage.setItem('xau_webhook', url); alert('تم الحفظ'); }} }});
-$('#test').addEventListener('click',()=>{{ const url=localStorage.getItem('xau_webhook'); if(!url) return alert('أضف رابط Webhook أولاً'); sendWebhook({{test:true, msg:'Ping from XAU signal page', t:Date.now()}}); alert('تم إرسال اختبار'); }});
-
-(()=>{{ const u=localStorage.getItem('xau_webhook'); if(u) $('#webhook').value=u; }})();
 </script>
 </body>
 </html>
